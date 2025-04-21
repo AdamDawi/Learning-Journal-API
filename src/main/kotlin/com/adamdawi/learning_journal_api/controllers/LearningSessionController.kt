@@ -5,12 +5,13 @@ import com.adamdawi.learning_journal_api.database.model.LearningMaterial
 import com.adamdawi.learning_journal_api.database.model.LearningSession
 import com.adamdawi.learning_journal_api.database.repository.LearningSessionRepository
 import org.bson.types.ObjectId
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.time.Instant
+
+
+// POST http:/localhost:8080/learning_session
+// GET http:/localhost:8080/learning_session?ownerId=213
+// DELETE http:/localhost:8080/learning_session/321
 
 @RestController
 @RequestMapping("/learning_session")
@@ -23,8 +24,7 @@ class LearningSessionController(
         val subject: String,
         val durationMinutes: Int,
         val materials: List<LearningMaterial> = emptyList(),
-        val notes: String? = null,
-        val ownerId: String
+        val notes: String? = null
     )
 
     data class LearningSessionResponse(
@@ -38,7 +38,9 @@ class LearningSessionController(
 
     //Insert new or update old
     @PostMapping
-    fun save(body: LearningSessionRequest): LearningSessionResponse {
+    fun save(
+        @RequestBody body: LearningSessionRequest
+    ): LearningSessionResponse {
         val learningSession = repository.save(
             LearningSession(
                 id = body.id?.let { ObjectId(it) } ?: ObjectId.get(),
@@ -47,7 +49,7 @@ class LearningSessionController(
                 materials = body.materials,
                 notes = body.notes,
                 date = Instant.now(),
-                ownerId = ObjectId(body.ownerId)
+                ownerId = ObjectId()
             )
         )
         return learningSession.toLearningSessionResponse()
@@ -60,6 +62,11 @@ class LearningSessionController(
         return repository.findByOwnerId(ObjectId(ownerId)).map {
             it.toLearningSessionResponse()
         }
+    }
+
+    @DeleteMapping(path = ["/{id}"])
+    fun deleteById(@PathVariable id: String) {
+        repository.deleteById(ObjectId(id))
     }
 }
 
