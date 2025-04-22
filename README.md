@@ -39,7 +39,7 @@ A RESTful API built with Spring Boot and Kotlin to help users track their learni
 ## 📚 Postman API documentation
 You can find a collection of the API endpoints with example requests and responses in this [Postman collection](https://documenter.getpostman.com/view/36810282/2sB2ixiDNG).
 
-## 🧑‍💻 Running Locally
+## 💻 Running Locally
 
 1. **Clone the repository:**
 ```bash
