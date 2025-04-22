@@ -8,6 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 
+// for every single request
 @Component
 class JwtAuthFilter(
     private val jwtService: JwtService
@@ -23,7 +24,7 @@ class JwtAuthFilter(
         if(authHeader != null && authHeader.startsWith("Bearer ")){
             if(jwtService.validateAccessToken(authHeader)){
                 val userId = jwtService.getUserIdFromToken(authHeader)
-                val auth = UsernamePasswordAuthenticationToken(userId, null)
+                val auth = UsernamePasswordAuthenticationToken(userId, null, emptyList())
                 // to retrieve auth across codebase
                 SecurityContextHolder.getContext().authentication = auth
             }

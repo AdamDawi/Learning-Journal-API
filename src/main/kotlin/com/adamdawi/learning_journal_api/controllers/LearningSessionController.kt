@@ -4,23 +4,27 @@ import com.adamdawi.learning_journal_api.controllers.LearningSessionController.L
 import com.adamdawi.learning_journal_api.database.model.LearningMaterial
 import com.adamdawi.learning_journal_api.database.model.LearningSession
 import com.adamdawi.learning_journal_api.database.repository.LearningSessionRepository
+import jakarta.validation.Valid
+import jakarta.validation.constraints.NotBlank
 import org.bson.types.ObjectId
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import java.time.Instant
 
 
-// POST http:/localhost:8080/learning_session
-// GET http:/localhost:8080/learning_session?ownerId=213
-// DELETE http:/localhost:8080/learning_session/321
+// POST http:/localhost:8080/learning_sessions
+// GET http:/localhost:8080/learning_sessions?ownerId=213
+// DELETE http:/localhost:8080/learning_sessions/321
 
 @RestController
-@RequestMapping("/learning_session")
+@RequestMapping("/learning_sessions")
 class LearningSessionController(
     private val repository: LearningSessionRepository
 ) {
 
     data class LearningSessionRequest(
         val id: String?,
+        @field:NotBlank(message = "Subject for the learning session is required")
         val subject: String,
         val durationMinutes: Int,
         val materials: List<LearningMaterial> = emptyList(),
@@ -39,8 +43,9 @@ class LearningSessionController(
     //Insert new or update old
     @PostMapping
     fun save(
-        @RequestBody body: LearningSessionRequest
+        @Valid @RequestBody body: LearningSessionRequest
     ): LearningSessionResponse {
+        val ownerId = SecurityContextHolder.getContext().authentication.principal as String
         val learningSession = repository.save(
             LearningSession(
                 id = body.id?.let { ObjectId(it) } ?: ObjectId.get(),
@@ -49,16 +54,16 @@ class LearningSessionController(
                 materials = body.materials,
                 notes = body.notes,
                 date = Instant.now(),
-                ownerId = ObjectId()
+                ownerId = ObjectId(ownerId)
             )
         )
         return learningSession.toLearningSessionResponse()
     }
 
     @GetMapping
-    fun findByOwnerId(
-        @RequestParam(required = true) ownerId: String
-    ): List<LearningSessionResponse> {
+    fun findByOwnerId(): List<LearningSessionResponse> {
+        // ownerId from token
+        val ownerId = SecurityContextHolder.getContext().authentication.principal as String
         return repository.findByOwnerId(ObjectId(ownerId)).map {
             it.toLearningSessionResponse()
         }
@@ -66,7 +71,13 @@ class LearningSessionController(
 
     @DeleteMapping(path = ["/{id}"])
     fun deleteById(@PathVariable id: String) {
-        repository.deleteById(ObjectId(id))
+        val learningSession = repository.findById(ObjectId(id)).orElseThrow{
+            IllegalArgumentException("Learning session not found")
+        }
+        val ownerId = SecurityContextHolder.getContext().authentication.principal as String
+        if(learningSession.ownerId.toHexString() == ownerId){
+            repository.deleteById(ObjectId(id))
+        }
     }
 }
 
