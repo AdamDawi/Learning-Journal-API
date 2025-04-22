@@ -1,6 +1,6 @@
 # Learning Journal API
 
-A RESTful API built with Spring Boot and Kotlin to help users track their learning sessions. It supports user authentication with JWT (access + refresh tokens), stores data in cloud MongoDB Atlas, and offers full CRUD functionality for learning sessions.
+A RESTful API built with Spring Boot and Kotlin to help users track their learning sessions. It supports user authentication with JWT (access + refresh tokens), stores data in cloud MongoDB Atlas, and offers full CRUD functionality for learning sessions. See [API documentation](#-postman-collection) for available endpoints.
 
 ## 🚀 Features
 
@@ -35,6 +35,9 @@ A RESTful API built with Spring Boot and Kotlin to help users track their learni
 | GET    | `/learning_sessions`          | Get all learning sessions for the user     |
 | POST   | `/learning_sessions`          | Create or update a learning session        |
 | DELETE | `/learning_sessions/{id}`     | Delete a learning session by ID            |
+
+## 📚 Postman Collection
+You can find a collection of the API endpoints with example requests and responses in this [Postman collection](https://documenter.getpostman.com/view/36810282/2sB2ixiDNG).
 
 ## 🧑‍💻 Running Locally
 
